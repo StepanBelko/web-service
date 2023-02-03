@@ -12,8 +12,8 @@ public class CarsDAO {
 
     static {
         cars.add(new Car(1, "BWM", 51000));
-        cars.add(new Car(3, "AUDI", 52000));
-        cars.add(new Car(2, "OPEL", 52000));
+        cars.add(new Car(2, "AUDI", 52000));
+        cars.add(new Car(3, "OPEL", 52000));
     }
 
     private CarsDAO() {
@@ -42,7 +42,7 @@ public class CarsDAO {
         Car car = new Car(id);
         int pos = cars.indexOf(car);
         if (pos >= 0) {
-            return cars.get(id);
+            return cars.get(pos);
         } else {
             return null;
         }
