@@ -1,6 +1,8 @@
 package by.itstep.stpnbelko.webservice.util;
 
 
+import by.itstep.stpnbelko.webservice.dao.impl.CurrencyDAO;
+import by.itstep.stpnbelko.webservice.model.Currency;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -10,12 +12,13 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.List;
 
-public class XMLCurrencyParser
-{
-    public XMLCurrencyParser() {}
+public class XMLCurrencyParser {
+    public XMLCurrencyParser() {
+    }
 
-    private static String CURRENCY_URL = "https://www.nbrb.by/Services/XmlExRates.aspx";
+    private static final String CURRENCY_URL = "https://www.nbrb.by/Services/XmlExRates.aspx";
 
     private static Document loadDocument(String url) {
         System.out.println("loadDocument");
@@ -27,13 +30,7 @@ public class XMLCurrencyParser
         } catch (java.net.ConnectException e) {
             System.err.print(" Oops! Something goes wrong! This is Belarus, baby! \nConnection timed out. ");
             System.err.print(CURRENCY_URL + " is not responsible. Please, try again later");
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (SAXException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParserConfigurationException e) {
+        } catch (SAXException | IOException | ParserConfigurationException e) {
             e.printStackTrace();
         }
 
@@ -43,26 +40,21 @@ public class XMLCurrencyParser
 
     public static String getCurrency(String currencyCode) {
 
-        System.out.println("getCurrency");
         boolean isCurrencyCodeNext = false;
         Document doc = loadDocument(CURRENCY_URL);
-        System.out.println("doc.getChildNodes() : " + doc.getChildNodes());
 
         if (doc != null) {
+
             NodeList nodes = doc.getFirstChild().getChildNodes();
-
-            System.out.println("nodes : " + nodes);
-
 
             for (int i = 0; i < nodes.getLength(); i++) {
                 Node parent = nodes.item(i);
-                System.out.println("nodes.item(" + i + ") = " + nodes.item(i));
 
                 if (parent.getNodeType() == 1) {
-                    NodeList childs = parent.getChildNodes();
+                    NodeList children = parent.getChildNodes();
 
-                    for (int ii = 0; ii < childs.getLength(); ii++) {
-                        Node child = childs.item(ii);
+                    for (int ii = 0; ii < children.getLength(); ii++) {
+                        Node child = children.item(ii);
                         if (child.hasChildNodes()) {
                             if ((child.getNodeName().trim().equalsIgnoreCase("Rate")) && (isCurrencyCodeNext)) {
                                 isCurrencyCodeNext = false;
@@ -81,7 +73,39 @@ public class XMLCurrencyParser
     }
 
 
-    public static void main(String[] args) {
-        System.out.println(getCurrency("840"));
+    public static List<Currency> getAllCurrenciesList() {
+        // Создается дерево DOM документа из файла
+        Document doc = loadDocument(CURRENCY_URL);
+        //dao для работы с листом
+        CurrencyDAO dao = new CurrencyDAO();
+        // Получаем корневой элемент
+        Node root = doc.getDocumentElement();
+
+        // Просматриваем все подэлементы корневого - т.е. валюты
+        NodeList currencies = root.getChildNodes();
+
+        for (int i = 0; i < currencies.getLength(); i++) {
+            Node currency = currencies.item(i);
+            // Если нода не текст, то это валюта - заходим внутрь
+            //Почему нужно проверять что это не текст?
+            if (currency.getNodeType() != Node.TEXT_NODE) {
+                Currency valuta = new Currency();
+                NodeList currencyProps = currency.getChildNodes();
+                valuta.setId(Integer.parseInt(currency.getAttributes().getNamedItem("Id").getNodeValue()));
+                for (int j = 0; j < currencyProps.getLength(); j++) {
+                    Node currencyProp = currencyProps.item(j);
+                    // Если нода не текст, то это один из параметров валюты - добавляем в лист
+                    if (currencyProp.getNodeType() != Node.TEXT_NODE) {
+                        dao.setCurrencyProp(valuta, currencyProp);
+                    }
+                }
+                dao.add(valuta);
+                System.out.println("added currency : " + valuta);
+                System.out.println("===========");
+            }
+        }
+
+        return dao.getCurrencyList();
     }
+
 }
