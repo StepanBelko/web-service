@@ -48,6 +48,7 @@ public class CarsDAO {
         }
     }
 
+
     public boolean update(Car car) {
         int pos = cars.indexOf(car);
         if (pos >= 0) {

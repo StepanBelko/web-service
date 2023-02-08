@@ -63,18 +63,6 @@ public class CarsService {
         return Response.ok(all.get(0)).build();
     }
 
-    @POST
-    @Path("/delete/{id}")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public  Response deleteById(@PathParam("id") int id) {
-        boolean isDeleted = dao.delete(id);
-        if (isDeleted) {
-            return  Response.ok("Car id: " + id + " successfully deleted").build();
-        } else {
-            return  Response.notModified().build();
-        }
-    }
-
 
     @GET
     @Path("{id}")
@@ -108,6 +96,18 @@ public class CarsService {
             return Response.ok("UPDATED").build();
         } else {
             return Response.status(Response.Status.NOT_MODIFIED).build();
+        }
+    }
+
+    @DELETE 
+    @Path("/delete/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public  Response deleteById(@PathParam("id") int id) {
+        boolean isDeleted = dao.delete(id);
+        if (isDeleted) {
+            return  Response.ok("Car id: " + id + " successfully deleted").build();
+        } else {
+            return  Response.notModified().build();
         }
     }
 
