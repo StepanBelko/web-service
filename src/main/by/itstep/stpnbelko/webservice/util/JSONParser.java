@@ -4,37 +4,44 @@ import by.itstep.stpnbelko.webservice.model.Coin;
 import by.itstep.stpnbelko.webservice.model.Currency;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 public class JSONParser {
 
-    public static void listToJson(List<Currency> currencyList) {
-        ObjectMapper mapper = new ObjectMapper();
+    private static final String TICKERS_URL = "https://api.coinlore.net/api/tickers/";
 
+    public static List<Coin> getCoinsListFromUrl() {
+        List<Coin> coinsList = null;
         try {
-            mapper.writeValue(new File("allCur.json"), currencyList);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+            String tickersJson = URLReader(new URL(TICKERS_URL), StandardCharsets.UTF_8);
+            // Считываем json
+            Object obj = new org.json.simple.parser.JSONParser().parse(tickersJson);
+            // Кастим obj в JSONObject
+            JSONObject rootJsonObj = (JSONObject) obj;
 
-    public static List<Currency> getFromJson() {
-        ObjectMapper mapper = new ObjectMapper();
-        List<Currency> currencyList;
-        File file = new File("allCur.json");
-        try {
-            currencyList = mapper.readValue(file, new TypeReference<>() {
+            JSONArray jsonArray = (JSONArray) rootJsonObj.get("data");
+
+            ObjectMapper mapper = new ObjectMapper();
+
+            coinsList = mapper.readValue(String.valueOf(jsonArray), new TypeReference<>() {
             });
-        } catch (IOException e) {
+
+            return coinsList;
+
+        } catch (IOException | ParseException e) {
             throw new RuntimeException(e);
         }
-        return currencyList;
     }
 
     public static String URLReader(URL url, Charset encoding) throws IOException {

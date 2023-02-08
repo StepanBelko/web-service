@@ -10,6 +10,7 @@ public class CurrencyDAO {
 
     private static List<Currency> currencyList = new ArrayList<>();
 
+
     public List<Currency> getCurrencyList() {
         return currencyList;
     }

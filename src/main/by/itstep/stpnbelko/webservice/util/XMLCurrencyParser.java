@@ -15,6 +15,7 @@ import java.net.MalformedURLException;
 import java.util.List;
 
 public class XMLCurrencyParser {
+
     public XMLCurrencyParser() {
     }
 

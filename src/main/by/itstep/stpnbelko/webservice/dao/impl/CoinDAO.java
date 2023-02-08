@@ -18,51 +18,39 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static by.itstep.stpnbelko.webservice.util.JSONParser.URLReader;
+import static by.itstep.stpnbelko.webservice.util.JSONParser.getCoinsListFromUrl;
 
 public class CoinDAO {
 
-    private static final URL tickersUrl;
-    private static List<Coin> coinsList = new ArrayList<>();
+    private static CoinDAO dao = new CoinDAO();
 
-    static {
-        try {
-            tickersUrl = new URL("https://api.coinlore.net/api/tickers/");
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
+    private static List<Coin> coinsList = getCoinsListFromUrl();
 
     public List<Coin> getCoinList() {
         return coinsList;
     }
 
-
-    public static List<Coin> getCoinsListFromUrl(URL url) {
-        try {
-            String tickersJson = URLReader(url, StandardCharsets.UTF_8);
-            // Считываем json
-            Object obj = new JSONParser().parse(tickersJson);
-            // Кастим obj в JSONObject
-            JSONObject rootJsonObj = (JSONObject) obj;
-
-            JSONArray jsonArray = (JSONArray) rootJsonObj.get("data");
-
-            ObjectMapper mapper = new ObjectMapper();
-
-            coinsList = mapper.readValue(String.valueOf(jsonArray), new TypeReference<>() {
-            });
-
-            return coinsList;
-
-        } catch (IOException | ParseException e) {
-            throw new RuntimeException(e);
+    public Coin getById(int id) {
+        for (Coin coin : coinsList) {
+            if (coin.getId() == id) {
+                return coin;
+            }
         }
+        return null;
     }
 
+    public Coin getBySymbol(String symbol) {
+        for (Coin coin : coinsList) {
+            if (coin.getSymbol().equalsIgnoreCase(symbol)) {
+                return coin;
+            }
+        }
+        return null;
+    }
 
     public static void main(String[] args) {
-        System.out.println(getCoinsListFromUrl(tickersUrl).get(0));
+        System.out.println(dao.getById(80));
+        System.out.println(dao.getBySymbol("ETH"));
     }
 
 
