@@ -17,7 +17,8 @@ public class Coin {
     private double percent_change_7d;
     private double market_cap_usd;
     private double volume24;
-    private double volume24_native;
+    private double volume24a;
+    private double volume_native;
     private double csupply;
     private double price_btc;
     private double tsupply;
